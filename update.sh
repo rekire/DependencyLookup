@@ -6,6 +6,7 @@ java -jar scanner/build/libs/scanner.jar SupportLibrary $ANDROID_HOME/extras/and
 echo Compare output with current stored version...
 mkdir tmp
 mv *.csv *.json tmp
+git fetch
 git checkout gh-pages -q
 rm *.csv *.json
 mv tmp/* .
