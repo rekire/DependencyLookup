@@ -1,0 +1,132 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Dependency lookup</title>
+    <script type="text/javascript">
+dbs={};
+lastSearch="";
+function listenerSetter() {
+  psVersion=document.getElementById("psVersion");
+  slVersion=document.getElementById("slVersion");
+  search=document.getElementById("className");
+  results=document.getElementById("results");
+  loadVersions(psVersion, "PlayServices");
+  loadVersions(slVersion, "SupportLibrary");
+  psVersion.onchange=function() {
+    loadDatabase("PlayServices", psVersion.value);
+  }
+  slVersion.onchange=function() {
+    loadDatabase("SupportLibrary", slVersion.value);
+  }
+  search.onchange=function() {
+    if(lastSearch==search.value) return;
+    var matches=[];
+    matches.add(lookup("PlayServices", psVersion.value, search.value));
+    matches.add(lookup("SupportLibrary", slVersion.value, search.value));
+    results.innerHTML="";
+    for(var i=0; i<matches.length; i++) {
+      results.innerHTML+="<li>"+matches[i]+"</li>";
+    }
+  }
+  search.onkeyup=function(e) {
+    if(e.keyCode==13) {
+      search.onchange();
+      return false;
+    }
+    if(search.value.length>3) {
+      search.onchange();
+    }
+  }
+  document.forms[0].onsubmit=function() {return false}
+}
+document.addEventListener('DOMContentLoaded', listenerSetter, false);
+Array.prototype.add=function(arr) {
+  for(var i=0; i<arr.length; i++) {
+    this[this.length]=arr[i];
+  }
+  return this;
+}
+
+function loadVersions(target, prefix) {
+  var httpRequest = new XMLHttpRequest();
+  if (!httpRequest) {
+    alert('Giving up :( Cannot create an XMLHTTP instance');
+    return;
+  }
+  httpRequest.onreadystatechange = function() {
+    if (httpRequest.readyState === XMLHttpRequest.DONE) {
+      if (httpRequest.status === 200) {
+        var versions = JSON.parse(httpRequest.responseText);
+        for(var i=0; i<versions.length; i++) {
+          target.innerHTML+="<option>"+versions[i]+"</option>\n";
+        }
+        target.selectedIndex=versions.length-1;
+        loadDatabase(prefix, target.value);
+      } else {
+        alert('There was a problem with the request.');
+      }
+    }
+  }
+  httpRequest.open('GET', prefix + "-versions.json");
+  httpRequest.send();
+}
+
+function loadDatabase(name, version) {
+  var httpRequest = new XMLHttpRequest();
+  if (!httpRequest) {
+    alert('Giving up :( Cannot create an XMLHTTP instance');
+    return;
+  }
+  httpRequest.onreadystatechange = function() {
+    if (httpRequest.readyState === XMLHttpRequest.DONE) {
+      if (httpRequest.status === 200) {
+        dbs[name]=httpRequest.responseText;
+        lastSearch="";
+        search.onchange();
+      } else {
+        alert('There was a problem with the request.');
+      }
+    }
+  }
+  httpRequest.open('GET', name + "-" + version + ".csv");
+  httpRequest.send();  
+}
+
+function lookup(table, version, search) {
+  var hit=-1;
+  var results=[];
+  var prefix;
+  switch(table) {
+  case 'PlayServices':
+    prefix="com.google.android.gms";
+    break;
+  case 'SupportLibrary':
+    prefix="com.android.support";
+    break;
+  default:
+    prefix="???";
+  }
+  while((hit=dbs[table].indexOf(search,hit+1))>0) {
+    var around=dbs[table].substring(Math.min(0,hit-200),dbs[table].indexOf("\n", hit));
+    var output=around.substring(around.lastIndexOf("\n")+1).split(";");
+    results[results.length]=prefix+":"+output[0]+":"+version+" "+output[1];
+  }
+  return results;
+}
+</script>
+</head>
+<body>
+<h1>Dependency lookup</h1>
+<p>This small tool is to find out which dependncy you need to add to use a class from the PlayServices or the Support Library. Just choose your library version and enter the name of the class you are searching</p>
+<form>
+    <label>PlayServices <select id="psVersion"></select></label>
+    <label>SupportLibrary <select id="slVersion"></select></label>
+    <label>Class <input type="text" id="className"/></label>
+</form>
+<h2>Results</h2>
+<ul id="results"></ul>
+</body>
+</html>

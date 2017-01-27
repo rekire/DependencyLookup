@@ -1,0 +1,12 @@
+multidex;android.support.multidex.BuildConfig
+multidex;android.support.multidex.MultiDex$V14
+multidex;android.support.multidex.MultiDex$V19
+multidex;android.support.multidex.MultiDex$V4
+multidex;android.support.multidex.MultiDex
+multidex;android.support.multidex.MultiDexApplication
+multidex;android.support.multidex.MultiDexExtractor$1
+multidex;android.support.multidex.MultiDexExtractor
+multidex;android.support.multidex.ZipUtil$CentralDirectory
+multidex;android.support.multidex.ZipUtil
+multidex-instrumentation;android.support.multidex.instrumentation.BuildConfig
+multidex-instrumentation;com.android.test.runner.MultiDexTestRunner
