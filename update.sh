@@ -7,7 +7,7 @@ echo Compare output with current stored version...
 mkdir tmp
 mv *.csv *.json tmp
 git fetch
-git checkout gh-pages -q
+git checkout origin/gh-pages -q
 rm *.csv *.json
 mv tmp/* .
 rmdir tmp
