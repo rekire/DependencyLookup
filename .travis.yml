@@ -1,0 +1,33 @@
+language: android
+sudo: required
+os: linux
+dist: precise
+cache:
+  directories:
+    - $HOME/.m2
+    - $HOME/.gradle
+notifications:
+  email: false
+android:
+  components:
+    - tools
+    - tools
+    - platform-tools
+    - extra-android-m2repository
+    - extra-google-m2repository
+  licenses:
+    - android-sdk-license-.+
+    - android-sdk-preview-license-.+
+    - google-gdk-license-.+
+script:
+  - mkdir "$ANDROID_HOME/licenses" || true
+  - echo -e "8933bad161af4178b1185d1a37fbf41ea5269c55" > "$ANDROID_HOME/licenses/android-sdk-license"
+  - echo -e "504667f4c0de7af1a06de9f4b1727b84351f2910" > "$ANDROID_HOME/licenses/android-sdk-preview-license"
+  - echo "sdk.dir=$ANDROID_HOME" > local.properties
+  - ./gradlew jar
+  - java -jar scanner/build/libs/scanner.jar $ANDROID_HOME/extras/google/m2repository/com/google/android/gms PlayServices
+  - java -jar scanner/build/libs/scanner.jar $ANDROID_HOME/extras/android/m2repository/com/android/support SupportLibrary
+  - ls -la
+  - cat PlayServices-versions.json
+jdk:
+  - oraclejdk8
