@@ -9,7 +9,7 @@ rm gh-pages/*.csv gh-pages/*.json
 mv *.csv *.json gh-pages
 cd gh-pages
 touch `date +Test-%H%M%S`
-if [ -z `git diff --exit-code` ]; then
+if [ `git ls-files --other --directory --exclude-standard | wc -l` -eq 0 ]; then
   echo No changes. Done.
   exit 0
 fi
@@ -20,11 +20,6 @@ git config user.email "bot@reki.re"
 git commit -m "Automatic documentation update"
 
 # Get the deploy key by using Travis's stored variables to decrypt deploy_key.enc
-ENCRYPTED_KEY_VAR="encrypted_${ENCRYPTION_LABEL}_key"
-ENCRYPTED_IV_VAR="encrypted_${ENCRYPTION_LABEL}_iv"
-ENCRYPTED_KEY=${!ENCRYPTED_KEY_VAR}
-ENCRYPTED_IV=${!ENCRYPTED_IV_VAR}
-openssl aes-256-cbc -K $ENCRYPTED_KEY -iv $ENCRYPTED_IV -in deploy_key.enc -out deploy_key -d
 chmod 600 bot_id_rsa
 eval `ssh-agent -s`
 ssh-add bot_id_rsa
