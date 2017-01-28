@@ -26,6 +26,7 @@ git config user.email "bot@reki.re"
 git commit -m "Automatic documentation update"
 
 git log
+git diff
 
 # Now that we're all set up, we can push.
 #git push origin gh-pages
