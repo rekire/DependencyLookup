@@ -4,23 +4,26 @@ os: linux
 dist: precise
 cache:
   directories:
-    - $HOME/.m2
-    - $HOME/.gradle
+  - $HOME/.m2
+  - $HOME/.gradle
 notifications:
   email: false
 android:
   components:
-    - tools
-    - tools
-    - platform-tools
-    - extra-android-m2repository
-    - extra-google-m2repository
+  - tools
+  - tools
+  - platform-tools
+  - extra-android-m2repository
+  - extra-google-m2repository
   licenses:
-    - android-sdk-license-.+
-    - android-sdk-preview-license-.+
-    - google-gdk-license-.+
+  - android-sdk-license-.+
+  - android-sdk-preview-license-.+
+  - google-gdk-license-.+
 script:
-  - ./gradlew jar
-  - ./update.sh
+- ./gradlew jar
+- ./update.sh
 jdk:
-  - oraclejdk8
+- oraclejdk8
+before_install:
+- openssl aes-256-cbc -K $encrypted_d5803db7a3cf_key -iv $encrypted_d5803db7a3cf_iv
+  -in bot_id_rsa.enc -out bot_id_rsa -d
