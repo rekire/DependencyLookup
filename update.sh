@@ -13,6 +13,7 @@ chmod 600 bot_id_rsa
 eval `ssh-agent -s`
 ssh-add bot_id_rsa
 
+# look for changes
 cd gh-pages
 touch `date +Test-%H%M%S`
 if [ `git ls-files --other --directory --exclude-standard | wc -l` -eq 0 ]; then
@@ -21,12 +22,7 @@ if [ `git ls-files --other --directory --exclude-standard | wc -l` -eq 0 ]; then
 fi
 echo Changes found, creating patch...
 git add *
-git diff
 git config user.name "Travis CI"
 git config user.email "bot@reki.re"
 git commit -m "Automatic documentation update"
-
-git log
-
-# Now that we're all set up, we can push.
-#git push origin gh-pages
+git push origin gh-pages
