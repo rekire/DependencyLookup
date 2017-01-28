@@ -21,12 +21,12 @@ if [ `git ls-files --other --directory --exclude-standard | wc -l` -eq 0 ]; then
 fi
 echo Changes found, creating patch...
 git add *
+git diff
 git config user.name "Travis CI"
 git config user.email "bot@reki.re"
 git commit -m "Automatic documentation update"
 
 git log
-git diff
 
 # Now that we're all set up, we can push.
 #git push origin gh-pages
