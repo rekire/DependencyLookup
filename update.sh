@@ -3,6 +3,7 @@ set -e
 echo Analyse the libraries...
 java -jar scanner/build/libs/scanner.jar PlayServices $ANDROID_HOME/extras/google/m2repository/com/google/android/gms
 java -jar scanner/build/libs/scanner.jar SupportLibrary $ANDROID_HOME/extras/android/m2repository/com/android/support
+java -jar scanner/build/libs/scanner.jar Firebase $ANDROID_HOME/extras/google/m2repository/com/google/firebase
 echo Compare output with current stored version...
 
 # prepare the key
