@@ -6,26 +6,32 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Dependency lookup</title>
     <script type="text/javascript">
-dbs={};
+dbs={'PlayServices':'','SupportLibrary':'','Firebase':''};
 lastSearch="";
 function listenerSetter() {
   psVersion=document.getElementById("psVersion");
   slVersion=document.getElementById("slVersion");
+  fbVersion=document.getElementById("fbVersion");
   search=document.getElementById("className");
   results=document.getElementById("results");
   loadVersions(psVersion, "PlayServices");
   loadVersions(slVersion, "SupportLibrary");
+  loadVersions(fbVersion, "Firebase");
   psVersion.onchange=function() {
     loadDatabase("PlayServices", psVersion.value);
   }
   slVersion.onchange=function() {
     loadDatabase("SupportLibrary", slVersion.value);
   }
+  fbVersion.onchange=function() {
+    loadDatabase("Firebase", fbVersion.value);
+  }
   search.onchange=function() {
     if(lastSearch==search.value) return;
     var matches=[];
     matches.add(lookup("PlayServices", psVersion.value, search.value));
     matches.add(lookup("SupportLibrary", slVersion.value, search.value));
+    matches.add(lookup("Firebase", fbVersion.value, search.value));
     results.innerHTML="";
     for(var i=0; i<matches.length; i++) {
       results.innerHTML+="<li>"+matches[i]+"</li>";
@@ -70,6 +76,7 @@ function loadVersions(target, prefix) {
       }
     }
   }
+  httpRequest.responseType='text';
   httpRequest.open('GET', prefix + "-versions.json");
   httpRequest.send();
 }
@@ -91,8 +98,9 @@ function loadDatabase(name, version) {
       }
     }
   }
+  httpRequest.responseType='text';
   httpRequest.open('GET', name + "-" + version + ".csv");
-  httpRequest.send();  
+  httpRequest.send();
 }
 
 function lookup(table, version, search) {
@@ -105,6 +113,9 @@ function lookup(table, version, search) {
     break;
   case 'SupportLibrary':
     prefix="com.android.support";
+    break;
+  case 'Firebase':
+    prefix='com.google.firebase';
     break;
   default:
     prefix="???";
@@ -124,6 +135,7 @@ function lookup(table, version, search) {
 <form>
     <label>PlayServices <select id="psVersion"></select></label>
     <label>SupportLibrary <select id="slVersion"></select></label>
+    <label>Firebase <select id="fbVersion"></select></label>
     <label>Class <input type="text" id="className"/></label>
 </form>
 <h2>Results</h2>
