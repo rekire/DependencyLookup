@@ -1,7 +1,9 @@
 apply plugin: 'java'
+apply plugin: 'kotlin'
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }
 
 jar {
@@ -13,3 +15,16 @@ jar {
 }
 sourceCompatibility = "1.8"
 targetCompatibility = "1.8"
+
+buildscript {
+    ext.kotlin_version = '1.0.0'
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+repositories {
+    mavenCentral()
+}
