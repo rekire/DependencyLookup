@@ -6,9 +6,11 @@
 <script type="text/javascript">
 console.log(new Date(), "Start request...");
 var dbDownload = new XMLHttpRequest();
+var startTime = parseInt(new Date());
 dbDownload.onreadystatechange = function() {
     if(dbDownload.readyState === XMLHttpRequest.DONE) {
         if(dbDownload.status === 200) {
+            var endTime = Date.parse(dbDownload.getResponseHeader('Date'));
             var db = JSON.parse(dbDownload.responseText);
             //store.clear();
             var ver = Date.parse(dbDownload.getResponseHeader('Date')) / 1000;
