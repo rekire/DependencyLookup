@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>DB test</title>
+<script type="text/javascript">
+console.log(new Date(), "Start request...");
+var dbDownload = new XMLHttpRequest();
+dbDownload.onreadystatechange = function() {
+    if(dbDownload.readyState === XMLHttpRequest.DONE) {
+        if(dbDownload.status === 200) {
+            var db = JSON.parse(dbDownload.responseText);
+            //store.clear();
+            var ver = Date.parse(dbDownload.getResponseHeader('Date')) / 1000;
+            console.log(new Date(), "Creating database...", ver);
+            //var tx = db.transaction("Classes", "readwrite");
+            //var store = tx.objectStore("Classes");
+            //for(var i = 0; i < classes.length; i++) {
+            //    store.put(classes[i]);
+            //}
+            initDB(ver, db.classes);
+        } else {
+            alert('There was a problem with the request.');
+        }
+    }
+};
+dbDownload.responseType = 'text';
+dbDownload.open('GET', "classes.json");
+dbDownload.send();
+//initDB(1501519698);
+
+function initDB(version, data) {
+    console.log("create db with version " + version, data);
+
+    // This works on all devices/browsers, and uses IndexedDBShim as a final fallback
+    var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB || window.shimIndexedDB;
+
+    // Open (or create) the database
+    var open = indexedDB.open("Dependencies", version);
+
+    // Create the schema
+    open.onupgradeneeded = function(oldVersion, newVersion) {
+        var db = open.result;
+
+        var store;
+
+        if(oldVersion) {
+            store = open.transaction.objectStore("Classes");
+            store.clear();
+        } else {
+            store = db.createObjectStore("Classes", {keyPath: "fqn"});
+            store.createIndex("bySpeak", "spoken");
+            store.createIndex("bySimpleName", "simpleName");
+            store.createIndex("byLowerSimpleName", "lowerSimpleName");
+        }
+
+        for(var i = 0; i < data.length; i++) {
+            data[i].lowerSimpleName = data[i].simpleName.toLowerCase();
+            store.put(data[i]).onerror = function(e) {
+                console.log(e)
+            };
+        }
+    };
+
+    open.onsuccess = function() {
+        db = open.result;
+        search.disabled = false;
+    };
+}
+
+// fqn search: range search based on package -> is always lower case
+// simple search lower case field
+function testQuery() {
+    console.log(new Date(), "start request");
+
+    var tx = db.transaction("Classes", "readonly");
+    var store = tx.objectStore("Classes");
+    var index = store.index("byLowerSimpleName");
+    var request = index.openCursor(IDBKeyRange.bound("act", "act" + '\uffff'));
+    var matches = 0;
+    request.onsuccess = function(event) {
+        var cursor = request.result;
+        if(cursor) {
+            // Called for each matching record.
+            //console.log(cursor.value.fqn);
+            matches++;
+            cursor.continue();
+        } else {
+            // No more matching records.
+            console.log(new Date(), "got " + matches + "rows");
+        }
+    };
+    //tx.close();
+}
+document.addEventListener('DOMContentLoaded', function() {
+    search = document.getElementById("className");
+    search.disabled = true;
+    var results = document.getElementById("results");
+    lastSearch = "";
+    results.innerHTML = "<p>Hold on we are loading the database</p>";
+
+    search.onchange = function() {
+        if(lastSearch === search.value) return;
+        lastSearch = search.value;
+        var result = "";
+        var tx = db.transaction("Classes", "readonly");
+        var store = tx.objectStore("Classes");
+        var index = store.index("byLowerSimpleName");
+        var str = search.value.toLowerCase();
+        var request = index.openCursor(IDBKeyRange.bound(str, str + '\uffff'));
+        var matches = 0;
+        request.onsuccess = function(event) {
+            var cursor = request.result;
+            if(cursor) {
+                // Called for each matching record.
+                //console.log(cursor.value.fqn);
+                matches++;
+                result += "<li>" + cursor.value.fqn + "</li>";
+                cursor.continue();
+            } else {
+                // No more matching records.
+                console.log(new Date(), "got " + matches + "rows");
+                results.innerHTML = result;
+            }
+        };
+    };
+    search.onkeyup = function(e) {
+        if(e.keyCode === 13) {
+            search.onchange();
+            return false;
+        }
+        if(search.value.length >= 2) {
+            search.onchange();
+        } else {
+            results.innerHTML = "<p>Enter at least 2 chars to start the search</p>";
+        }
+    };
+    document.forms[0].onsubmit = function() {
+        return false
+    }
+}, false);
+</script>
+</head>
+<body>
+<h1>Dependency lookup</h1>
+<p>This small tool is to find out which dependncy you need to add to use a class from the PlayServices or the Support
+    Library. Just choose your library version and enter the name of the class you are searching</p>
+<form>
+    <label>Class <input type="text" id="className" disabled="disabled"/></label>
+</form>
+<h2>Results</h2>
+<ul id="results"></ul>
+</body>
+</html>
