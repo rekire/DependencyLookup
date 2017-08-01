@@ -39,12 +39,12 @@ function initDB(version, data) {
     var open = indexedDB.open("Dependencies", version);
 
     // Create the schema
-    open.onupgradeneeded = function(oldVersion, newVersion) {
+    open.onupgradeneeded = function() {
         var db = open.result;
 
         var store;
 
-        if(oldVersion) {
+        if(open.transaction.objectStoreNames.length>0) {
             store = open.transaction.objectStore("Classes");
             store.clear();
         } else {
